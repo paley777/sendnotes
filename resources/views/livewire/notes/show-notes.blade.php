@@ -6,9 +6,17 @@ use App\Models\Note;
 new class extends Component {
     public function delete($noteId)
     {
+        // Temukan note berdasarkan ID
         $note = Note::where('id', $noteId)->first();
+
+        // Pastikan user memiliki izin untuk menghapus note
         $this->authorize('delete', $note);
+
+        // Hapus note
         $note->delete();
+
+        // Setelah menghapus, perbarui data notes
+        $this->notes = Auth::user()->notes()->orderBy('send_date', 'asc')->get();
     }
 
     public function placeholder()
@@ -65,7 +73,8 @@ new class extends Component {
                             <p class="text-xs">Recipient: <span class="font-semibold">{{ $note->recipient }}</span></p>
                             <div>
                                 <x-mini-button icon="eye" href="{{ route('notes.view', $note) }}"></x-mini-button>
-                                <x-mini-button icon="trash" wire:click="delete('{{ $note->id }}')"></x-mini-button>
+                                <x-mini-button icon="trash"
+                                    wire:click="delete('{{ $note->id }}')"></x-mini-button>
                             </div>
                         </div>
                     </x-card>
